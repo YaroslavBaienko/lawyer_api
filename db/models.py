@@ -17,9 +17,8 @@ class Client(BaseModel):
     name = Column(String(100), unique=True, index=True)  # Added length constraint
     phone = Column(String(15), index=True)  # Added length constraint for phone number
     email = Column(String(100), index=True, nullable=False)  # Made email not nullable
-    note = Column(String(300), index=True)  # Added length constraint
+    note = Column(String(300), unique=True, index=True)  # Added length constraint
     is_admin = Column(Boolean, default=False)
-    hashed_password = Column(String)
 
 
 class Judge(BaseModel):

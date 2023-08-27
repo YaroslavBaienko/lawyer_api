@@ -1,11 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException
-from db.database import engine, Base, SessionLocal
+from fastapi import FastAPI
+from db.database import engine, Base
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 from api import clients, judges
 from fastapi.staticfiles import StaticFiles
-from starlette.responses import RedirectResponse
-import uvicorn
 import logging
 
 # Setting up logging

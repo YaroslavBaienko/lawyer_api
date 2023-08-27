@@ -6,9 +6,8 @@ class ClientBase(BaseModel):
     name: str
     phone: str
     email: Optional[str] = None
-    note: Optional[str] = None
+    note: str
     is_admin: Optional[bool] = False
-    hashed_password: str
 
 
 class ClientCreate(ClientBase):
