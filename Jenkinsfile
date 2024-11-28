@@ -1,60 +1,49 @@
 pipeline {
     agent any
-
     environment {
-        VENV_DIR = 'venv' // Директория виртуального окружения
-        APP_PORT = '8000' // Порт для запуска приложения
+        VENV_DIR = 'venv' // Путь к виртуальному окружению
+        APP_PORT = '8000' // Порт, на котором будет работать приложение
     }
-
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'master', credentialsId: 'ubuntu2-vbox', url: 'git@github.com:YaroslavBaienko/lawyer_api.git'
+                echo 'Cloning repository...'
+                git branch: 'master',
+                    credentialsId: 'ubuntu2-vbox',
+                    url: 'https://github.com/YaroslavBaienko/lawyer_api.git'
             }
         }
-
-        stage('Install Python and Dependencies') {
+        stage('Setup Python Environment') {
             steps {
+                echo 'Setting up Python environment...'
                 sh '''
-                # Убедиться, что Python установлен
-                sudo apt update
-                sudo apt install -y python3 python3-venv python3-pip
-
-                # Создать виртуальное окружение
                 python3 -m venv ${VENV_DIR}
-
-                # Активировать виртуальное окружение и установить зависимости
                 source ${VENV_DIR}/bin/activate
+                pip install --upgrade pip
                 pip install -r requirements.txt
                 '''
             }
         }
-
-        stage('Run FastAPI Application') {
+        stage('Run Application') {
             steps {
+                echo 'Starting the application...'
                 sh '''
-                # Активировать виртуальное окружение
                 source ${VENV_DIR}/bin/activate
-
-                # Убедиться, что процесс на порту не занят
-                lsof -ti:${APP_PORT} | xargs -r kill -9 || true
-
-                # Запустить приложение в фоновом режиме
-                nohup uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT} &
+                nohup uvicorn main:app --host 0.0.0.0 --port ${APP_PORT} > uvicorn.log 2>&1 &
                 '''
             }
         }
     }
-
     post {
         always {
-            echo 'Build complete!'
+            echo 'Pipeline finished.'
         }
         success {
-            echo 'FastAPI application successfully deployed!'
+            echo 'Application successfully deployed!'
         }
         failure {
-            echo 'Build failed. Please check the logs for errors.'
+            echo 'Deployment failed. Check the logs for details.'
+            sh 'cat uvicorn.log'
         }
     }
 }
