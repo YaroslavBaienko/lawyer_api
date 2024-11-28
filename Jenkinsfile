@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'ubuntu2-vbox' // Используйте метку вашего агента
+        label 'ubuntu2-vbox' // Используйте вашу метку агента
     }
 
     environment {
@@ -23,7 +23,7 @@ pipeline {
                     sh '''
                     cd ${PROJECT_DIR}
                     python3 -m venv ${VENV_DIR}
-                    source ${VENV_DIR}/bin/activate
+                    . ${VENV_DIR}/bin/activate
                     pip install -r requirements.txt
                     '''
                 }
@@ -36,7 +36,7 @@ pipeline {
                     echo "Running the application..."
                     sh '''
                     cd ${PROJECT_DIR}
-                    source ${VENV_DIR}/bin/activate
+                    . ${VENV_DIR}/bin/activate
                     nohup uvicorn main:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
                     '''
                 }
