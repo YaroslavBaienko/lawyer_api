@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'virtualbox ubuntu2-vbox' // Используйте метку вашего агента
+        label 'ubuntu2-vbox' // Используйте метку вашего агента
     }
 
     environment {
