@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'ubuntu2-vbox' // Используйте вашу метку агента
+        label 'ubuntu2-vbox'
     }
 
     environment {
@@ -9,21 +9,20 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-                echo "Repository cloned."
-            }
-        }
-
         stage('Prepare Environment') {
             steps {
                 script {
+                    echo "Setting up system dependencies..."
+                    sh '''
+                    sudo apt update
+                    sudo apt install -y python3-distutils python3-venv
+                    '''
                     echo "Setting up Python environment..."
                     sh '''
                     cd ${PROJECT_DIR}
                     python3 -m venv ${VENV_DIR}
                     . ${VENV_DIR}/bin/activate
+                    pip install --upgrade pip setuptools
                     pip install -r requirements.txt
                     '''
                 }
