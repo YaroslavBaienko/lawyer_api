@@ -14,8 +14,8 @@ pipeline {
                 script {
                     echo "Setting up system dependencies..."
                     sh '''
-                    echo "your_password" | sudo -S apt update
-                    echo "your_password" | sudo -S apt install -y python3-distutils python3-venv
+                    sudo apt update
+                    sudo apt install -y python3-distutils python3-venv
                     '''
                     echo "Setting up Python environment..."
                     sh '''
