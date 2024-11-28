@@ -1,92 +1,67 @@
 pipeline {
-    agent {
-        label 'ubuntu2-vbox' // Задаем метку для агента
-    }
+    agent "ubuntu2-vbox"
 
     environment {
-        VENV_DIR = "venv" // Директория виртуального окружения
-        APP_DIR = "/home/jenkins/lawyer_api" // Директория проекта на агенте
-        HOST = "0.0.0.0" // Хост для запуска приложения
-        PORT = "8000" // Порт для запуска приложения
-        LOG_FILE = "uvicorn.log" // Лог файл для записи логов uvicorn
+        PROJECT_DIR = "/home/attor/workspace/lawyer-api"
+        VENV_DIR = "${PROJECT_DIR}/venv"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                script {
-                    echo "Cloning the repository"
-                }
-                // Клонирование кода на агенте
                 checkout scm
+                echo "Repository cloned."
             }
         }
 
         stage('Prepare Environment') {
             steps {
                 script {
-                    echo "Setting up Python environment"
-                }
-                // Установка виртуального окружения и зависимостей
-                sh '''
-                cd ${APP_DIR}
-                if [ ! -d ${VENV_DIR} ]; then
+                    echo "Setting up Python environment..."
+                    sh '''
+                    cd ${PROJECT_DIR}
                     python3 -m venv ${VENV_DIR}
-                fi
-                source ${VENV_DIR}/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
-                '''
+                    source ${VENV_DIR}/bin/activate
+                    pip install -r requirements.txt
+                    '''
+                }
             }
         }
 
         stage('Run Application') {
             steps {
                 script {
-                    echo "Running FastAPI application"
+                    echo "Running the application..."
+                    sh '''
+                    cd ${PROJECT_DIR}
+                    source ${VENV_DIR}/bin/activate
+                    nohup uvicorn main:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
+                    '''
                 }
-                // Остановка старого процесса на порту
-                sh '''
-                PID=$(lsof -t -i:${PORT})
-                if [ ! -z "$PID" ]; then
-                    kill -9 $PID
-                fi
-                '''
-                // Запуск приложения через uvicorn
-                sh '''
-                cd ${APP_DIR}
-                source ${VENV_DIR}/bin/activate
-                nohup uvicorn main:app --host ${HOST} --port ${PORT} > ${LOG_FILE} 2>&1 &
-                '''
             }
         }
 
         stage('Health Check') {
             steps {
                 script {
-                    echo "Checking if application is running"
+                    echo "Checking if the application is running..."
+                    sh 'curl -f http://127.0.0.1:8000 || exit 1'
                 }
-                // Проверка доступности сервиса
-                sh '''
-                sleep 5
-                curl -f http://127.0.0.1:${PORT} || exit 1
-                '''
             }
         }
     }
 
     post {
         success {
-            echo "Application deployed successfully!"
+            echo "Deployment successful."
         }
         failure {
             echo "Deployment failed. Check logs for details."
             sh '''
-            cat ${APP_DIR}/${LOG_FILE}
+            if [ -f ${PROJECT_DIR}/uvicorn.log ]; then
+                cat ${PROJECT_DIR}/uvicorn.log
+            fi
             '''
-        }
-        always {
-            echo "Pipeline execution completed."
         }
     }
 }
