@@ -1,50 +1,60 @@
 pipeline {
     agent any
 
+    environment {
+        VENV_DIR = 'venv' // Директория виртуального окружения
+        APP_PORT = '8000' // Порт для запуска приложения
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/YaroslavBaienko/lawyer_api.git'
+                git branch: 'master', credentialsId: 'ubuntu2-vbox', url: 'git@github.com:YaroslavBaienko/lawyer_api.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install Python and Dependencies') {
             steps {
                 sh '''
-                # Создаем виртуальное окружение
-                python3 -m venv venv
-                source venv/bin/activate
+                # Убедиться, что Python установлен
+                sudo apt update
+                sudo apt install -y python3 python3-venv python3-pip
 
-                # Устанавливаем зависимости
-                pip install --upgrade pip
+                # Создать виртуальное окружение
+                python3 -m venv ${VENV_DIR}
+
+                # Активировать виртуальное окружение и установить зависимости
+                source ${VENV_DIR}/bin/activate
                 pip install -r requirements.txt
                 '''
             }
         }
 
-        stage('Deploy to Node') {
+        stage('Run FastAPI Application') {
             steps {
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: 'remote-node', // Настройка SSH-соединения
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: '**',
-                                    remoteDirectory: '/home/ubuntu/lawyer_api', // Путь на ноде
-                                    removePrefix: '',
-                                    execCommand: '''
-                                    cd /home/ubuntu/lawyer_api
-                                    source venv/bin/activate
-                                    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-                                    '''
-                                )
-                            ],
-                            verbose: true
-                        )
-                    ]
-                )
+                sh '''
+                # Активировать виртуальное окружение
+                source ${VENV_DIR}/bin/activate
+
+                # Убедиться, что процесс на порту не занят
+                lsof -ti:${APP_PORT} | xargs -r kill -9 || true
+
+                # Запустить приложение в фоновом режиме
+                nohup uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT} &
+                '''
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Build complete!'
+        }
+        success {
+            echo 'FastAPI application successfully deployed!'
+        }
+        failure {
+            echo 'Build failed. Please check the logs for errors.'
         }
     }
 }
