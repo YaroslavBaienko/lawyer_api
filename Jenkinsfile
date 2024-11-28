@@ -1,5 +1,7 @@
 pipeline {
-    agent "ubuntu2-vbox"
+    agent {
+        label 'ubuntu2-vbox' // Используйте метку вашего агента
+    }
 
     environment {
         PROJECT_DIR = "/home/attor/workspace/lawyer-api"
