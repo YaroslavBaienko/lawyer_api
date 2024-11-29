@@ -34,7 +34,7 @@ pipeline {
                 echo 'Starting the FastAPI application...'
                 sh '''
                 . ${VENV_PATH}/bin/activate
-                uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug > ${APP_LOG} 2>&1 &
+                nohup uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug > ${APP_LOG} 2>&1 &
                 '''
             }
         }
