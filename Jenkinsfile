@@ -23,6 +23,7 @@ pipeline {
                 python3 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
                 pip install --upgrade pip setuptools wheel
+                pip cache purge
                 pip install numpy --only-binary :all:
                 pip install -r requirements.txt
                 '''
@@ -39,7 +40,6 @@ pipeline {
                 fi
                 . ${VENV_PATH}/bin/activate
                 nohup uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug > ${APP_LOG} 2>&1 &
-                disown
                 '''
             }
         }
