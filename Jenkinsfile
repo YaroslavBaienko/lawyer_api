@@ -23,6 +23,7 @@ pipeline {
                 python3 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
                 pip install --upgrade pip setuptools wheel
+                pip cache purge
                 pip install numpy --only-binary :all:
                 pip install -r requirements.txt
                 '''
@@ -33,6 +34,10 @@ pipeline {
             steps {
                 echo 'Starting the FastAPI application...'
                 sh '''
+                if lsof -i:8000; then
+                    echo "Port 8000 is already in use. Killing the process..."
+                    kill -9 $(lsof -t -i:8000)
+                fi
                 . ${VENV_PATH}/bin/activate
                 nohup uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug > ${APP_LOG} 2>&1 &
                 '''
@@ -41,6 +46,8 @@ pipeline {
 
         stage('Health Check') {
             steps {
+                echo 'Waiting for the application to start...'
+                sh 'sleep 5'
                 echo 'Checking if the application is running...'
                 script {
                     def response = sh(script: 'curl -s -o /dev/null -w "%{http_code}" http://0.0.0.0:8000', returnStdout: true).trim()
