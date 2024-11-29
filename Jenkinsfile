@@ -23,8 +23,8 @@ pipeline {
                 python3 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
                 pip3 install --upgrade pip
-                pip3 install -r requirements.txt
                 pip3 install setuptools
+                pip3 install -r requirements.txt
                 '''
             }
         }
