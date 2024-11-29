@@ -30,18 +30,6 @@ pipeline {
             }
         }
 
-        stage('Health Check') {
-            steps {
-                echo 'Checking application environment...'
-                sh '''
-                if ! python3 --version; then
-                    echo "Python3 is not installed or configured correctly"
-                    exit 1
-                fi
-                '''
-            }
-        }
-
         stage('Run Application') {
             steps {
                 echo 'Starting the FastAPI application...'
@@ -52,7 +40,22 @@ pipeline {
                 fi
                 . ${VENV_PATH}/bin/activate
                 nohup uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug > ${APP_LOG} 2>&1 &
+                echo $! > ${WORKSPACE}/uvicorn.pid
                 '''
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                echo 'Waiting for the application to start...'
+                sh 'sleep 5'
+                echo 'Checking if the application is running...'
+                script {
+                    def response = sh(script: 'curl -s -o /dev/null -w "%{http_code}" http://0.0.0.0:8000', returnStdout: true).trim()
+                    if (response != '200') {
+                        error "Application is not running properly. HTTP status code: ${response}"
+                    }
+                }
             }
         }
     }
@@ -71,6 +74,7 @@ pipeline {
         }
         success {
             echo 'Deployment succeeded. Application is running.'
+            echo 'Process ID saved to ${WORKSPACE}/uvicorn.pid'
         }
     }
 }
