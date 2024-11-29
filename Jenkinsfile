@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'ubuntu2-vbox' } // Указание агента
 
     environment {
         VENV_PATH = "${WORKSPACE}/venv"
