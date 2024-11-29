@@ -23,6 +23,7 @@ pipeline {
                 python3 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
                 pip3 install --upgrade pip
+                pip3 install numpy==1.25.2 --only-binary :all:
                 pip3 install setuptools
                 pip3 install -r requirements.txt
                 '''
