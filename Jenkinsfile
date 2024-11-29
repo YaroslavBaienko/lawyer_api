@@ -43,7 +43,7 @@ pipeline {
             steps {
                 echo 'Checking if the application is running...'
                 script {
-                    def response = sh(script: 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000', returnStdout: true).trim()
+                    def response = sh(script: 'curl -s -o /dev/null -w "%{http_code}" http://0.0.0.0:8000', returnStdout: true).trim()
                     if (response != '200') {
                         error "Application is not running properly. HTTP status code: ${response}"
                     }
