@@ -19,7 +19,7 @@ pipeline {
                 echo 'Setting up system dependencies...'
                 sh '''
                 # Обновление пакетов и установка системных зависимостей
-                sudo apt update -y
+                echo 1334keiNdeltA$ | sudo -S apt update
                 sudo apt install -y python3 python3-venv python3-pip
                 # Настройка виртуального окружения
                 python3 -m venv ${VENV_PATH}
