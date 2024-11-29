@@ -23,7 +23,6 @@ pipeline {
                 python3 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
                 pip install --upgrade pip setuptools wheel
-                pip cache purge
                 pip install numpy --only-binary :all:
                 pip install -r requirements.txt
                 '''
@@ -40,7 +39,7 @@ pipeline {
                 fi
                 . ${VENV_PATH}/bin/activate
                 nohup uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug > ${APP_LOG} 2>&1 &
-                echo $! > ${WORKSPACE}/uvicorn.pid
+                disown
                 '''
             }
         }
@@ -51,7 +50,7 @@ pipeline {
                 sh 'sleep 5'
                 echo 'Checking if the application is running...'
                 script {
-                    def response = sh(script: 'curl -s -o /dev/null -w "%{http_code}" http://0.0.0.0:8000', returnStdout: true).trim()
+                    def response = sh(script: 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000', returnStdout: true).trim()
                     if (response != '200') {
                         error "Application is not running properly. HTTP status code: ${response}"
                     }
@@ -74,7 +73,6 @@ pipeline {
         }
         success {
             echo 'Deployment succeeded. Application is running.'
-            echo 'Process ID saved to ${WORKSPACE}/uvicorn.pid'
         }
     }
 }
