@@ -20,10 +20,10 @@ pipeline {
                 sh '''
                 echo '1334keiNdeltA$' | sudo -S apt update -y
                 echo '1334keiNdeltA$' | sudo -S apt install -y python3 python3-venv python3-pip build-essential libssl-dev libffi-dev python3-dev
-                python3 -m venv ${VENV_PATH}
+                python3.10 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
                 pip install --upgrade pip setuptools wheel
-                pip install numpy==2.1.3 --only-binary :all:
+                pip install numpy --only-binary :all:
                 pip install -r requirements.txt
                 '''
             }
