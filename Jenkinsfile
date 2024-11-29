@@ -39,7 +39,8 @@ pipeline {
                     kill -9 $(lsof -t -i:8000)
                 fi
                 . ${VENV_PATH}/bin/activate
-                nohup uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug > ${APP_LOG} 2>&1 &
+                nohup uvicorn main:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
+
                 '''
             }
         }
