@@ -19,7 +19,7 @@ pipeline {
                 echo 'Setting up system dependencies...'
                 sh '''
                 echo '1334keiNdeltA$' | sudo -S apt update -y
-                echo '1334keiNdeltA$' | sudo -S apt install -y python3 python3-venv python3-pip
+                echo '1334keiNdeltA$' | sudo -S apt install -y python3 python3-venv python3-pip python3-distutils
                 python3 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
                 pip install --upgrade pip
