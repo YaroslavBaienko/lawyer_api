@@ -20,7 +20,7 @@ pipeline {
                 sh '''
                 echo '1334keiNdeltA$' | sudo -S apt update -y
                 echo '1334keiNdeltA$' | sudo -S apt install -y python3 python3-venv python3-pip build-essential libssl-dev libffi-dev python3-dev
-                python3.10 -m venv ${VENV_PATH}
+                python3 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
                 pip install --upgrade pip setuptools wheel
                 pip install numpy --only-binary :all:
@@ -34,12 +34,19 @@ pipeline {
                 echo 'Starting the FastAPI application...'
                 sh '''
                 . ${VENV_PATH}/bin/activate
-                nohup uvicorn main:app --host 0.0.0.0 --port 8000 > ${APP_LOG} 2>&1 &
+                nohup uvicorn main:app --host 127.0.0.1 --port 8000 > ${APP_LOG} 2>&1 &
                 '''
             }
         }
 
-
+        stage('Health Check') {
+            steps {
+                echo 'Checking if the application is running...'
+                script {
+                    def response = sh(script: 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000', returnStdout: true).trim()
+                    if (response != '200') {
+                        error "Application is not running properly. HTTP status code: ${response}"
+                    }
                 }
             }
         }
