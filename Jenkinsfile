@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'ubuntu2-vbox' } // Указание агента
+    agent { label 'ubuntu2-vbox' }
 
     environment {
         VENV_PATH = "${WORKSPACE}/venv"
@@ -18,12 +18,10 @@ pipeline {
             steps {
                 echo 'Setting up system dependencies...'
                 sh '''
-                # Обновление пакетов и установка системных зависимостей
-                echo 1334keiNdeltA$ | sudo -S apt update
-                sudo apt install -y python3 python3-venv python3-pip
-                # Настройка виртуального окружения
+                echo '1334keiNdeltA$' | sudo -S apt update -y
+                echo '1334keiNdeltA$' | sudo -S apt install -y python3 python3-venv python3-pip
                 python3 -m venv ${VENV_PATH}
-                source ${VENV_PATH}/bin/activate
+                . ${VENV_PATH}/bin/activate
                 pip install --upgrade pip
                 pip install -r requirements.txt
                 '''
@@ -34,7 +32,7 @@ pipeline {
             steps {
                 echo 'Starting the FastAPI application...'
                 sh '''
-                source ${VENV_PATH}/bin/activate
+                . ${VENV_PATH}/bin/activate
                 nohup uvicorn main:app --host 0.0.0.0 --port 8000 > ${APP_LOG} 2>&1 &
                 '''
             }
