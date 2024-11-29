@@ -47,7 +47,7 @@ pipeline {
         stage('Health Check') {
             steps {
                 echo 'Waiting for the application to start...'
-                sh 'sleep 5'
+                sh 'sleep 10'
                 echo 'Checking if the application is running...'
                 script {
                     def response = sh(script: 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000', returnStdout: true).trim()
