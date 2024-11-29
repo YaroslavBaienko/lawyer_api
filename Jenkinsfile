@@ -19,11 +19,12 @@ pipeline {
                 echo 'Setting up system dependencies...'
                 sh '''
                 echo '1334keiNdeltA$' | sudo -S apt update -y
-                echo '1334keiNdeltA$' | sudo -S apt install -y python3 python3-venv python3-pip python3-distutils
+                echo '1334keiNdeltA$' | sudo -S apt install -y python3 python3-venv python3-pip
                 python3 -m venv ${VENV_PATH}
                 . ${VENV_PATH}/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
+                pip3 install --upgrade pip
+                pip3 install -r requirements.txt
+                pip3 install python3-distutils
                 '''
             }
         }
